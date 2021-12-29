@@ -38,6 +38,8 @@ plugins:
 header_pages:
   - about.html
   - resources.html
+  - datascienceposts.html
+
 
 # Exclude from processing.
 # The following items will not be processed, by default.
