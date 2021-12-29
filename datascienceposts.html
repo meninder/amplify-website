@@ -15,8 +15,8 @@ permalink: /data-science-posts/
             <code>{{ post.date | date: date_format }}</code> &nbsp·&nbsp {{ post.title | escape }}
           </a>
 
-        {%- if site.show_excerpts -%}
-          {{ post.excerpt }}
+        {%- if site.show_caption -%}
+          {{ post.caption }}
         {%- endif -%}
       </li>
       {%- endfor -%}

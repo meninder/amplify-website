@@ -1,0 +1,49 @@
+---
+layout: post
+title:  "Hierarchical Job Clusters"
+date:   2018-05-01 10:00:00 -0500
+tags: scraping nlp
+favorite: "no"
+caption: "NLP and jobs"
+---
+
+<h2>Introduction</h2>
+<p>Last week, I gave a guest lecture at NYU School of Engineering last week to Financial Engineering students on a Data
+    Science topic. The lecture covered Unsupervised Learning techniques: PCA, K-means and Hierarchical clustering. I
+    started the lecture by discussing the breadth of potential career paths in Finance. On the train ride home after the
+    lecture, it occurred to me that I could use a clustering algorithm to build a map of the roles within a Bank. I
+    think this would be helpful to anyone because there are universes amongst universes inside these large Banks; only
+    select gray haired veterans have a true understanding of. Wouldn’t it be nice if we could draw a diagram showing
+    that? </p>
+<h2>The Data </h2>
+<p>The most obtainable data on jobs that I could think of are the descriptions themselves. The goal would be to
+    related the descriptions, a natural language processing (NLP) problem. However, the first issue getting the job
+    descriptions to create a first pass/proof of concept. Using <a href="http://monster.com/">monster.com’s</a> “rss”
+    feed, I was able to get
+    about
+    15 descriptions for 4 separate job searches: 'financial analyst', 'accounting manager', 'web developer',
+    'pharmaceutical sales'). </p>
+
+
+<h2>The Code</h2>
+<p>Natural Language Processing (NLP) is notoriously difficult and I have never used any of the Python NLTK libraries
+    to solve a problem. Fortunately, bloggers have posted prototype proof of concepts. In particular, <a
+            href="http://brandonrose.org/clustering"> this </a>
+    approach for clustering movie descriptions was highly translatable to job description clustering. Briefly,
+    after vectorizing the job description, a distance was calculated between vectors. Then the vectors were
+    clustered using Ward’s linkage function.</p>
+
+<p>Much more work is required to take this seriously. Specifically: 1) more data 2) optimize vectorization thresholds
+    3) scrub/vet data appropriately 4) pick a good distance measure.</p>
+
+
+<h2>Results</h2>
+<p>In the diagram below, the horizontal length of the legs joining two nodes is proportional to their dissimilarity:
+    nodes joined by short legs are highly related. Of the 4 job descriptions, web developer stands alone and tends to
+    have job descriptions highly related to each other. Pharmaceutical sales is also well clustered, although can be
+    found closely linked to accounting managers in some cases. Financial analyst, a very vague title, tends to be
+    sprinkled in. </p>
+
+<img src="/assets/img/posts/hierarchical-job-clustering.png" loading="lazy" alt="Figure">
+<p>Figure 1: Dendrogram of 15 job descriptions from each of 4 searches: 'financial analyst', 'accounting manager', 'web
+    developer', 'pharmaceutical sales'.</p>

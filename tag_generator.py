@@ -56,3 +56,5 @@ def main():
     total_tags = get_tags_dir(post_dir_=post_dir)
     write_tag_pages(tag_dir, total_tags)
     print("Tags generated, count", len(total_tags))
+
+main()

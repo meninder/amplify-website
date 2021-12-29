@@ -1,0 +1,57 @@
+---
+layout: post
+title:  "Effects of Sampling"
+date:   2020-01-20 10:00:00 -0500
+tags: statistics machine-learning
+favorite: "no"
+caption: "Counterintuitive results from imbalanced data"
+---
+
+<p>I was surprised to find that a model can generate the same <a
+        href="https://www.meninderpurewal.com/data-meandering/effect-of-sampling-on-roc-amp-pr-curves#:~:text=generate%20the%20same-,ROC%20curve,-%2C%20but%20have%20drastically">ROC
+    curve</a>, but have drastically different
+    <a
+            href="https://en.wikipedia.org/wiki/Precision_and_recall">precisions</a> depending on the data set the model
+    is applied to. It became clear why after thinking through. </p>
+
+<p>I was recently working with an imbalanced data set $D$, where the positive minority class represented ~5% of the
+    samples. I down sampled the negative class to create a balanced (50-50 split) data set $D^{'}$. I trained the model
+    on $D^{'}$. For model performance, I generated the ROC curve and the Precision/Recall using both $D$
+    and $D^{'}$. While the ROC curve was the same for both, the precision dropped from 80% on $D^{'}$ to 10% on $D$.
+    What is the interpretation?</p>
+
+<p>The ROC curve is the True Positive Rate (TPR) plotted against the False Positive Rate (FPR). TPR measures the
+    success rate within the actual positive sample space. FPR measures the rate of errors within the actual negative
+    space.  Thus, if the rate of prediction within each class remains the same for $D$ and $D^{'}$, the ROC curve will
+    look
+    similar. </p>
+
+<p>On the other hand, precision measures performance of the positive predictions, mixing the actual postiive and
+    negative sample space. Going from $D^{'}$ to $D$ increases the
+    number of negative samples. If the rate of prediction within each class remains the same, giving a similar ROC
+    curve, then the precision will drop because of the substantially more negative samples. Essentially, the model will
+    be calling many of the new negative samples as positive.</p>
+
+<h2>Mathematically</h2>
+<ul>
+    <li>Assume that $FPR$ and $TPR$ remains the same</li>
+    <li>$TN$, $TP$, $FN$, $FP$ is the number of True Negatives, True Positives, False Negatives, False Positives.</li>
+    <li>Actual negative class is under sampled by a factor $n$ - this only effects the number of $TN$ and $FP$.</li>
+</ul>
+<div class="math-space">
+$$ Precision_{D^{'}} = \frac{TP}{TP + FP} $$
+$$ Precision_D = \frac{TP}{TP + nFP} $$
+    <p>Taking the ratio of the two:</p>
+$$ \frac{Precision_{D^{'}}}{Precision_D} = \frac{TP + nFP}{ TP + FP}$$
+</div>
+
+<p>Plugging in numbers to see the impact.  Assume:
+    <ol>
+    <li>$TP \sim FP$, so that $Precision_{D^{'}}$=50%</li>
+    <li>n~5 (majority negative class is 5x minority positive class)</li>
+</ol>
+Then the ratio reduces to:  $ \frac{Precision_{D^{'}}}{Precision_D} = \frac{1+n}{2} = 3$.  The precision on the under
+sampled class $D^{'}$ will be 3x higher than on the full data set $D$.</p>
+
+<p>Note that $FPR$ and $TPR$ will remain the same independent of sample size because the $n$ will cancel in the
+    numerator and denominator (not shown).</p>
