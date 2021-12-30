@@ -1,0 +1,76 @@
+---
+layout: post
+title:  "NoSQL"
+date:   2020-06-19 10:00:00 -0500
+tags: book-review data-engineering
+favorite: "no"
+caption: "Summary of an excellent book on NoSQL"
+---
+<p>In most of my experience as a Data Science at a large Bank, I have retrieved data from relational databases. More
+    recently, we have built a new platform, where I have been working with Cassandra for timeseries on a Kubernetes
+    cluster. I happened to watch this 1-hour <a href="https://www.youtube.com/watch?v=qI_g07C_Q5I">presentation </a>
+    on NoSQL databases, which furthered my motivation to understand the topic, so I read a <a
+            href="https://www.amazon.com/NoSQL-Distilled-Emerging-Polyglot-Persistence/dp/0321826620/ref=sr_1_2?dchild=1&keywords=nosql&qid=1592230765&sr=8-2">textbook</a>
+    on NoSQL by Pramod Sadalage and Martin Fowler. Below are my notes.
+</p>
+<ul>
+    <li>Polyglot Persistence is the idea of using different data stores in different circumstances. The term borrows
+        from
+        the term Polyglot Programming referring to multiple computer programming languages within an application.
+
+    <li>NoSQL is a movement, not a technology.
+
+    <li>Relational databases are not designed to run on clusters and thus scaling presents a challenge. Amazon (Dynamo
+        paper) and Google (BigTable paper) were very influential in setting the direction for the resolution.
+
+    <li>Relational databases often work very well. Migrating away from this framework should be motivated by a specific
+        objective (e.g. running on clusters).
+
+    <li>Integration databases are a single source of data for multiple applications. The alternative paradigm is an
+        Application database, which has a one to one relationship between storage and application.
+
+    <li>Application databases are the paradigm of NoSQL. The application “knows” the database structure. A schemaless db
+        shifts the schema into the application that accesses it. This type of db is more forgiving for evolving needs.
+
+    <li>Relational databases are good for analyzing data. NoSQL databases are not flexible for querying.
+
+    <li>There are 4 types of NoSQL dbs, the first 3 are called aggregate oriented data models.
+        <ul>
+            <li>Key-Value: Redis, Riak, Dynamo; value is opaque
+
+            <li>Document: MongoDB, Couch; value has structure.
+
+            <li>Column-family: Cassandra, HBase
+
+            <li>Graph: NodeJs
+        </ul>
+    <li>An aggregate is a collection of related objects that are treated as an object. They form the boundaries of an
+        ACID operation. It is central to running on a cluster.
+
+    <li>Distribution Model. Demonstrates the trade-off between consistency and availability.
+        <ul>
+            <li>Single-server
+
+            <li>Sharding: different parts of data onto different servers. Each server is a single source of a subset of
+                data.
+
+            <li>Master/slave replication: Replicating data across multiple nodes with one node the authority (master).
+                Helps read scalability.
+
+            <li>Peer-to-peer replication: Replicating data across all nodes, no authority. Helps write scalability.
+                Linear scaling because no master (Cassandra is example).
+        </ul>
+    <li>Consistency:
+        <ul>
+            <li>Conflicts occur when clients try to write the same data at the same time (write-write) or one client
+                reads inconsistent data during another’s write (read-write).
+
+            <li>Pessimistic approach lock data to prevent conflicts, optimistic detects conflicts and fixes.
+
+            <li>To get good consistency, many nodes should be involved but the reduces latency.
+
+            <li>CAP Theorem: when you create partitions, you trade-off consistency with availability.
+        </ul>
+</ul>
+<img src="/assets/img/posts/no-sql.jpg" loading="lazy" alt="Figure", height="auto", width="500px">
+
