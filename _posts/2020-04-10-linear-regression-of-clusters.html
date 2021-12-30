@@ -1,0 +1,40 @@
+---
+layout: post
+title:  "Linear Regression of Clusters"
+date:   2020-04-10 10:00:00 -0500
+tags: statistics machine-learning
+favorite: "no"
+caption: "PyMC3 for more interesting linear regressions"
+---
+
+<h2>Introduction</h2>
+<p>We have all seen a scatter plot that shows a clear linear relationship.   I recently came across a financial scatter
+    plot of that appeared to have multiple linear lines describing the data, one for each group of clients.
+    Unfortunately, I am not allowed to use that data.  So to illustrate a method that automatically fits multiple lines without explicit labeling, I will use
+    <a href="https://www.kaggle.com/mirichoi0218/insurance/tasks">Insurance Forecast</a> data. </p>
+
+<h2>The Data</h2>
+<p>Figure 1 shows a plot pf dollars charged for a patient versus the age.  The plot shows that are possibly three
+    separate linear relationships.
+    Potentially, there can be features beyond age that explain the three groupings.  In this case, these features are
+    smoking status and BMI.  However, assume your data engineer didn’t track that feature - a common occurrence as
+    the trade-off between tracking every piece of data under the sun can result in unnecessarily burdensome technology stack.
+    How could you discern the underlying behavoir?
+</p>
+
+<h2>The Model</h2>
+<p>If you wanted to model the relationship between age and charges, one solution would be a two-step process: 1)  identify the latent variable label via clustering and then 2) performing the regression separately on each cluster.  A more powerful solution of probabilistic programming combines this into one step using pymc3. Assuming a priori a model as follows and fitting:</p>
+<p>
+    $$p_k= Dir(a_k)$$ mixing coefficient
+    $$a_1,a_2,a_3~N(10^4,10^5)$$ intercept
+    $$b_1,b_2,b_3~N(10^3, 10^4)$$ slope
+    $$s \sim HalfNormal(s =10^4)$$ error
+    $$m_k= a_k+b_k x$$
+    model: $$f = p_1 m_1 + p_2 m_2 + p_3 m_3$$
+
+</p>
+
+<img src="/assets/img/posts/linear-regression-of-clusters-1.png" loading="lazy" alt="Figure">
+<p>Figure 1</p>
+
+
