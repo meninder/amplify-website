@@ -38,7 +38,7 @@ plugins:
 header_pages:
   - about.html
   - resources.html
-  - allposts.html
+  - writing.html
 
 show_caption: True
 
