@@ -1,0 +1,44 @@
+---
+layout: post
+title:  "Scraping and Home Heating Oil"
+date:   2021-01-11 10:00:00 -0500
+tags: scraping
+favorite: "no"
+caption: "Scraping your home heating oil data and building a mini model"
+---
+
+<p>I recently moved to a house that uses <a href="https://en.wikipedia.org/wiki/Heating_oil">heating oil</a>. The tank
+    has a wireless sensor that transmits the number
+    of gallons remaining in the tank via the provider's website. I was interested in estimating how many gallons of oil
+    we use based on the temperature outside. This requires two steps: record the daily value of gallons remaining in the
+    tank and regress it against the temperature outside.</p>
+
+<ol>
+    <li><u>Scraping your data</u>: The code on this <a href="https://github.com/meninder/HomeHeatingOil">Github page</a>
+        shows how to use the Python <a href="https://selenium-python.readthedocs.io/">selenium</a> package to
+        log into
+        your account, access the appropriate page and extract the field called gallons. A daily <a
+                href="https://en.wikipedia.org/wiki/Cron">cron</a> job runs
+        the code, see <a
+                href="https://ole.michelsen.dk/blog/schedule-jobs-with-crontab-on-mac-osx/">this</a> for creating a
+        job
+        on a Mac.
+    </li>
+    <li><u>Linear Regression</u>: External temperature is pulled from this site as a csv. A linear relationship is
+        estimated using the daily gallons and temperature recorded. In other words, daily gallons used = daily gallons
+        used at 0 deg F + temperature x daily gallons used per degree. This is estimated using sklearn and the constants
+        are: daily gallons used at 0F is ~20 gallons and gallons used per degree = -0.2 gallons per degree. In other
+        words, if it is 30F outside, we expect to use about 15 gallons.
+    </li>
+    <li><u>K-factor and degree days</u>: You can also calculate a home's <a
+            href="https://www.griffithenergyservices.com/articles/degree-days-and-the-k-factor">k-factor</a>, a measure
+        of efficiency. This number is
+        most useful when comparing numbers to other homes, like your neighborhood. Roughly, you take the sum of degree
+        days and divide it by the total gallons you use. Degree days just 65 - average temperature fo that day. So,
+        using 15 gallons on a day that is 30 degrees is a k-factor of about 2, which is extremely inefficient. While it
+        depends on square footage, new houses can be on the order of 6.
+    </li>
+
+</ol>
+
+<img src="/assets/img/posts/scraping-and-home-heating.png" loading="lazy" alt="Figure", height="auto", width="600px">

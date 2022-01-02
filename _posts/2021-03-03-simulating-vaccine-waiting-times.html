@@ -1,0 +1,37 @@
+---
+layout: post
+title:  "Simulating Vaccine Waiting Times"
+date:   2021-03-03 10:00:00 -0500
+tags: modeling
+favorite: "no"
+caption: "A model to estimate how many vaccine shots can be administered."
+---
+
+<h2>Introduction</h2>
+<p>
+    I was fortunate enough to get a <a
+        href="https://www1.nyc.gov/site/coronavirus/vaccines/covid-19-vaccines.page">vaccine</a> shot yesterday,
+    qualifying via my <a href="https://engineering.nyu.edu/faculty/meninder-purewal">faculty</a> association with NYU.  I
+                                             believe it was the first day they tried to double the number of vaccines given, attempting 7.5k vaccines.  I waited about 5 hours in line at the Javits Center, so I had a lot of time to think about wait times.
+</p>
+
+<h2>Simulation</h2>
+<p>
+    I modeled the wait times as a <a href="https://en.wikipedia.org/wiki/Poisson_point_process">Poisson
+    processes</a> in
+    Python.  Some estimates and assumptions: there were about
+                                     40 active vaccine stations, it took about 4 minutes to inject the vaccine and ~3 minutes to turnover the seat.  According to my simulation, I think they overestimated the amount of vaccines they could give by 2x: after 10 hours, they could give about 3.3k vaccines, ranging from 3k in a bad scenario and 3.4k in an optimistic one.
+</p>
+
+<img src="/assets/img/posts/simulating-vaccine-waiting-times.png" loading="lazy" alt="Figure", height="auto",
+     width="800px">
+
+<h2>Space</h2>
+<p>One way to increase throughput is to increase the number of stations, but this requires more space.  The Javits Center seems to boast 760k sqft of space, although we were all crammed into one floor in a fraction of the space.  For this estimate, I am assuming the space needs are: 1) stations occupy about 10'x10' 2) people waiting are supposed to wait 6' apart.  The total available square footage estimate is based on 1) first floor only 2) 25% of the area is used for storage and staff 3) 25% of the area is walkways for people to get through 4) 15% is 'waste' space.
+</p>
+<p>This means that of the 760k sq ft, the first floor has: 190k on the first floor and 66k sq ft available for stations and those waiting.  For 40 vaccine stations and 750 people waiting, this occupies 30k sq ft, roughly half the available.  Doubling this to 80 stations and 1500 people waiting, gets to 54k sq ft - still under the estimated amount.  When accounting for waiting space and check-in desks etc, my guess is that doubling the number might be hard, but do-able if they use the other floors.
+</p>
+
+<h2>An aside</h2>
+<p>I was pleased with how well behaved  everyone was despite the unexpected wait times.  It made me think about how most people felt fortunate enough to be able to get one in the first place, so wouldn't complain.  In contrast, in airport lines people feel entitled and get line rage.  Perhaps because they paid or have a deeper sense of urgency that they need to be somewhere else?  Despite the limited communication, the vaccine process exuded competency one might expect from a functional government - that part felt very good.
+</p>

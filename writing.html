@@ -8,18 +8,27 @@ permalink: /writing/
     <h1 class="page-heading">{{ page.title }}</h1>
 
     <ul class="post-list">
-      {%- for post in site.posts -%}
-      <li>
-        {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
-          <a class="post-link" href="{{ post.url | relative_url }}">
-            <code>{{ post.date | date: date_format }}</code> &nbsp·&nbsp {{ post.title | escape }}
-          </a>
+        {%- for post in site.posts -%}
+        <li>
+            {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+            <a class="post-link" href="{{ post.url | relative_url }}">
+                <code>{{ post.date | date: date_format }}</code> &nbsp·&nbsp {{ post.title | escape }}
+            </a>
 
-        {%- if site.show_caption -%}
-          {{ post.caption }}
-        {%- endif -%}
-      </li>
-      {%- endfor -%}
+            {%- if site.show_caption -%}
+                {{ post.caption }}
+            {%- endif -%}
+
+
+            <span>
+                {% for tag in post.tags %}
+                    {% capture tag_name %}{{ tag }}{% endcapture %}
+                    <a href="/tag/{{ tag_name }}"><code class="highligher-rouge"><nobr>{{ tag_name }}</nobr></code>&nbsp;</a>
+                {% endfor %}
+            </span>
+
+        </li>
+        {%- endfor -%}
     </ul>
 
 </div>
