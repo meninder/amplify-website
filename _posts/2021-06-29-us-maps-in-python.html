@@ -1,0 +1,25 @@
+---
+layout: post
+title:  "US Maps in Python"
+date:   2021-06-29 10:00:00 -0500
+tags: graphing maps
+favorite: "no"
+caption: "Making maps in Python."
+---
+
+<p>
+    Creating a US Map in Python turns out to be more  straightforward than simple Google searches yielded for me, so
+    posting <a href="https://github.com/meninder/JupyterNotebooks/blob/main/GeoPandas_Example.ipynb">here</a>.  There are
+    2 requirements beyond your basic Python setup: 1) the <a href="https://geopandas.org/">geopandas package</a> and 2)
+               getting 'shape files'.  The former is done via <a href="https://pypi.org/project/geopandas/">pip
+    install</a>.  The latter has some nuances, described here:
+</p>
+
+<ul>
+    <li>Get shape files from <a href="https://www2.census.gov/geo/tiger/GENZ2018/shp">census bureau</a> (for US,
+        probably has others).  In the code below, I show how to download via Python, but one can do manually.</li>
+    <li>Depending on what you are doing, there's different files to choose from based on resolution.</li>
+    <li>Out of the box, it might not be what you need exactly, so additional massaging needed.  In my example below, the plot includes American Samoa.  Hence, any plot becomes irrationally small because it is scaled as such.  I left out Hawaii and Alaska for this reason, but one can code up a way to include these in a reasonable way (not included here).</li>
+</ul>
+
+<img src="/assets/img/posts/us-maps-in-python.png" loading="lazy" alt="Figure" , height="auto" , width="800px">
