@@ -40,7 +40,11 @@ header_pages:
   - writing.html
   - resources.html
 
+# caption for posts
 show_caption: True
+
+#google-analytics
+google_analytics: G-9X2510WP61
 
 # Exclude from processing.
 # The following items will not be processed, by default.
