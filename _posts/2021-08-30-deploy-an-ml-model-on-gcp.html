@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Deploying An ML Model on GCP"
-date:   2021-08-13 10:00:00 -0500
+date:   2021-08-30 10:00:00 -0500
 tags: deployment engineering teardown
 favorite: "no"
 caption: "Tutorial on Google Cloud Platform"
@@ -21,30 +21,20 @@ caption: "Tutorial on Google Cloud Platform"
 </p>
 
 <ul>
-    <li><b>Part I</b> covers a simple <a href="https://flask.palletsprojects.com/en/2.0.x/">Flask</a> web
+    <li><a href="{% link _posts/2021-08-30-deploy-an-ml-model-on-gcp-1.html %}">Part I</a> covers a simple <a
+            href="https://flask.palletsprojects.com/en/2.0.x/">Flask</a> web
         <a href="https://pythonbasics.org/what-is-flask-python/">micro-framework</a>
         application that serves up some text locally, then deployed on the cloud. In this part, we set up a GCP project
         following Google's documentation. The output is a simple set of static text display.
     </li>
-    <li><b>Part II</b> locally trains an sklearn <a
+    <li><a href="{% link _posts/2021-08-30-deploy-an-ml-model-on-gcp-2.html %}">Part II</a> locally trains an sklearn <a
             href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html">
         RandomForestRegressor</a> model on a simple data set. The model artifact is
         then uploaded to Google Cloud Storage. A model is deployed on Google Cloud's AI Platform and locally called for
         predictions.
     </li>
-    <li><b>Part III</b> puts it all together. The web application from Part I is modified to take features as an input
-        and then calls AI Platform to make a prediction and display it.
+    <li><a href="{% link _posts/2021-08-30-deploy-an-ml-model-on-gcp-3.html %}">Part III</a> puts it all together.
+        The web application from Part I is modified to take features as an input  and then calls AI Platform to make
+        a prediction and display it.
     </li>
-</ul>
-
-<h2>Part I: Deploying a Basic Application</h2>
-<h2>Part II: Train, Store, and Deploy a Machine Model (<a href="https://cloud.google.com/ai-platform/training/docs/getting-started-scikit-xgboost">link</a>)</h2>
-<h2>Part III: Putting it all together</h2>
-<p>Deploy an app where the user inputs the data and the model makes a predictions and writes it.</p>
-<ul>
-    <li>See file in <a href="https://github.com/meninder/NYUDeployMLApplication/tree/main/App2">code</a>:/App2/</li>
-    <li>Look at differences from App1 (requirements, main, index.html, output.html)</li>
-    <li><code>gcloud app deploy</code></li>
-    <li><code>gcloud app browse</code></li>
-    <li>make predictions from the web endpoint</li>
 </ul>

@@ -1,0 +1,62 @@
+---
+layout: post
+title:  "Deploying An ML Model on GCP: Part 1"
+date:   2021-08-30 10:00:00 -0500
+tags: deployment engineering teardown
+favorite: "no"
+caption: "Tutorial on Google Cloud Platform: Part 1"
+---
+
+<h2>Part I: Deploying a Basic Application</h2>
+<p> Set up & deploy first application locally and via GAE.  <a
+        href="https://cloud.google.com/appengine/docs/standard/python3/building-app">GCP instructions</a>. And <a
+        href="https://github.com/meninder/NYUDeployMLApplication/tree/main/App1">code</a>
+    mixed with example GCP  code.</p>
+<h3>A: Creating the project</h3>
+<ul>
+    <li>Setup a GCP account & <a href="https://cloud.google.com/sdk/docs/install">install gcloud SDK</a> & connect.</li>
+    <li><a href="https://cloud.google.com/sdk/gcloud/reference/auth/login">Authorize</a> gcloud to access the Cloud
+        Platform with Google user credentials.  The command below will redirect you to your browser to login.
+        <code>gcloud auth login</code></li>
+    <li>Create a project (dashboard->new project [drop down])</li>
+    <li>Your local python interpreter matters when using gcloud; create separate env for clean env (see below).</li>
+    <li><a href="https://cloud.google.com/sdk/gcloud/reference/config/configurations/create">Create</a> gcloud config
+        from terminal: <code>gcloud config configurations create CONFIGURATION_NAME</code></li>
+    <li>Set project name (eg project Project ID): <code>gcloud config set < property > < PROPERTY > </code></li>
+    <li>Create a credentials file via a services account, download key, and export path (all instructions
+        <a href="https://cloud.google.com/docs/authentication/getting-started">here</a>).</li>
+    <li>Enable the Cloud Build API.</li>
+</ul>
+
+<h3>B: Code inspection & run locally</h3>
+<ul>
+    <li>Environment Set up: create virtual env and activate:<br/>
+        <code>virtualenv < name > </code> <br/>
+        <code>source < name >/bin/activate </code><br/>
+        <code>pip install -r requirements.txt</code>
+    </li>
+    <li>Web Service Structure
+        <ul>
+            <li>building-an-app/ {app.yaml, main.py, requirements.txt}</li>
+            <li>static/{script.js, style.css}</li>
+            <li>templates/{index.html}</li>
+            <li><a href="http://jinja.pocoo.org/docs/2.10/templates/">Jinja-based HTML template</a></li>
+            <li>Edit index file to include your name</li>
+        </ul>
+    </li>
+    <li>Run locally:
+        <ul>
+            <li>Terminal: <code>python main.py</code></li>
+            <li>Go to host domain</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>C: Deploying Web Service</h3>
+<ul>
+    <li>Create app engine, deploy app engine, and view (command line or https://PROJECT_ID.REGION_ID.r.appspot.com)<br/>
+        <code>gcloud app create</code>;<code>gcloud app deploy</code>;<code>gcloud app browse</code>
+    </li>
+    <li>By default, the gcloud app deploy command deploys only the app.yaml file in your current directory. Whenever you run this command, App Engine generates a unique ID for the version that you deploy, deploys the version to the Cloud project you configured the gcloud tool to use, and routes all traffic to the new version. The new version becomes the default version.</li>
+    <li>Congratulations!  You've deployed an App!</li>
+</ul>

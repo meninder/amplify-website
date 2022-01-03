@@ -1,0 +1,81 @@
+---
+layout: post
+title:  "Deploying An ML Model on GCP: Part 2"
+date:   2021-08-30 10:00:00 -0500
+tags: deployment engineering teardown
+favorite: "no"
+caption: "Tutorial on Google Cloud Platform: Part 2"
+---
+
+<h2>Part II: Train, Store, and Deploy a Machine Model (<a href="https://cloud.google.com/ai-platform/training/docs/getting-started-scikit-xgboost">link</a>)</h2>
+<h3>A: Train model a model artifact</h3>
+<p>Run file TrainModel/main.py in <a href="https://github.com/meninder/NYUDeployMLApplication/tree/main/TrainModel">
+    code</a> and export as a pickle file.</p>
+
+<h3>B: Move to Cloud Storage bucket</h3>
+<ul>
+    <li>Create a storage bucket in Terminal<br/>
+        <code> BUCKET_NAME=< PROJECT_ID >-aiplatform </code><br/>
+        <code> REGION=us-east1 </code><br/>
+        <code> gsutil mb -l $REGION gs://$BUCKET_NAME </code>
+    </li>
+    <li>Train your model and export (Python code).<br/>
+        <code>with open('model.pkl', 'wb') as model_file:</code><br/>
+        <code>&nbsp;    pickle.dump(classifier, model_file)</code>
+    </li>
+    <li>Upload model to bucket in Terminal<br/>
+        <code>TRAIN_MODEL_DIR="/Users/meninder/Google Drive/Mikey/Code/nyu/TrainModel/"</code><br/>
+        <code>gsutil cp < from full model path, including file > < to storage bucket ></code>
+    </li>
+</ul>
+<h3>C: Deploy Model and Versions </h3>
+<p>AI Platform - terminal, can also use console</p>
+<ul>
+    <li>Create a model resource:
+    <code>gcloud ai-platform models create regression_insurance_model --region=us-east1</code>
+    </li>
+    <li>Create a model version<br/>
+        <code>MODEL_DIR="gs://$BUCKET_NAME"</code><br/>
+        <code>VERSION_NAME="version1"</code><br/>
+        <code>MODEL_NAME="regression_insurance_model"</code><br/>
+        <code>FRAMEWORK="SCIKIT_LEARN"</code><br/>
+        <code>gcloud ai-platform versions create $VERSION_NAME --model=$MODEL_NAME --origin=$MODEL_DIR --runtime-version=2.5 --framework=$FRAMEWORK --python-version=3.7 --region=us-east1</code><br/>
+        Confirm it is deployed: <code>gcloud ai-platform versions describe $VERSION_NAME
+            --model=$MODEL_NAME</code>
+    </li>
+</ul>
+
+
+<h3>D: Making predictions</h3>
+<ul>
+    <li>Create input.json file:
+        <code>INPUT_FILE="$TRAIN_MODEL_DIR"input.json</code><br/>
+    </li>
+    <li>Calling local prediction to local model in Terminal (DON'T FORGET: use path to pickle file, not specific
+        'model.pkl' file).  For this to work, you need tensor flow installed (pip install tensorflow).<br/>
+        <code>gcloud ai-platform local predict --model-dir "$TRAIN_MODEL_DIR" --json-instances "$TRAIN_MODEL_DIR"input.json --framework scikit-learn</code>
+    </li>
+    <li>Calling local to stored model in Terminal.  Make prediction: <br/>
+        <code>gcloud ai-platform predict --model $MODEL_NAME --version $VERSION_NAME --json-instances
+            "$INPUT_FILE"</code>
+    </li>
+    <li>Calling local to stored model in Python.  Make prediction.
+        <ul>
+            <li>See file <a href="https://github.com/meninder/NYUDeployMLApplication/tree/main/TrainModel">code</a>
+                TrainModel/call_prediction .py<br/>
+            <code>pip install google-api-python-client</code>
+            </li>
+            <li>API enablement (<a
+                    href="https://cloud.google.com/ai-platform/prediction/docs/python-client-library#set_up_your_gcp_project">link</a>): AI Platform Training & Prediction, Compute Engine APIs
+            </li>
+            <li>Setting up service accounts so you can call from Python API, <a
+                    href="https://cloud.google.com/ai-platform/training/docs/python-client-library">here</a></li>
+            <ul>
+                <li>Create service account, role: AI Platform Admin & Storage Object Admin.</li>
+                <li>Create key, download.</li>
+            </ul>
+
+        </ul>
+    </li>
+
+</ul>
