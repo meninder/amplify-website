@@ -1,0 +1,148 @@
+********************
+title:  "Rush Hour at Penn Station"
+date:2018-03-08
+tags:cloud, scraping, modeling
+caption: "Scraping Penn Station data to get an edge"
+********************
+title:  "Child Care Business in NJ"
+date:2018-03-15
+tags:graphing
+caption: "Graphing and maps."
+********************
+title:  "Beer Nutrition"
+date:2018-03-20
+tags:modeling
+caption: "Beer & data, what more can you ask for?"
+********************
+title:  "Harness Your Fitbit Data"
+date:2018-04-11
+tags:modeling, sports
+caption: "Ownership of a Fitbit is highly correlated to obsessive compulsive behavior."
+********************
+title:  "Hierarchical Job Clusters"
+date:2018-05-01
+tags:scraping, nlp
+caption: "NLP and jobs"
+********************
+title:  "Improve your Win Rate"
+date:2019-10-26
+tags:sports, statistics
+caption: "How do you capitalize on your edge?"
+********************
+title:  "The Idea Maze"
+date:2019-12-24
+tags:career-advice, strategy
+caption: "Oldie, but a goodie
+********************
+title:  "Effects of Sampling"
+date:2020-01-20
+tags:statistics, machine-learning
+caption: "Counterintuitive results from imbalanced data"
+********************
+title:  "Linear Regression of Clusters"
+date:2020-04-10
+tags:statistics, machine-learning
+caption: "PyMC3 for more interesting linear regressions"
+********************
+title:  "NoSQL"
+date:2020-06-19
+tags:book-review, engineering
+caption: "Summary of an excellent book on NoSQL"
+********************
+title:  "Scraping and Home Heating Oil"
+date:2021-01-11
+tags:scraping
+caption: "Scraping your home heating oil data and building a mini model"
+********************
+title:  "Decisions and Quitting"
+date:2021-1-17
+tags:career-advice, strategy
+caption: "If you are struggling in deciding between two choices."
+********************
+title:  "Knowledge and XKCD in Jupyter"
+date:2021-01-26
+tags:career-advice, graphing
+caption: "xkcd
+********************
+title:  "The Dark Side of Resilience"
+date:2021-1-26
+tags:career-advice, strategy
+caption: "How resilience can be a bad thing."
+********************
+title:  "Data Science in Times of Crisis"
+date:2021-02-12
+tags:career-advice, strategy
+caption: "Crisis managers ask for data in decreasing order of complexity."
+********************
+title:  "Simulating Vaccine Waiting Times"
+date:2021-03-03
+tags:modeling
+caption: "A model to estimate how many vaccine shots can be administered."
+********************
+title:  "Geothmetic Median"
+date:2021-03-21
+tags:graphing
+caption: "Python code to calculate Geothmetic Meandian"
+********************
+title:  "Packaging An Application"
+date:2021-04-21
+tags:deployment, engineering
+caption: "Using setuptools in Python."
+********************
+title:  "Who's In First (Place)?"
+date:2021-06-09
+tags:sports, scraping
+caption: "Ah, being a Mets fan..."
+********************
+title:  "Downsampling"
+date:2021-06-10
+tags:machine-learning, statistics
+caption: "Probability adjustment after downsampling in ML models"
+********************
+title:  "Decision Types"
+date:2021-06-25
+tags:career-advice, strategy
+caption: "Bezos knows best."
+********************
+title:  "US Maps in Python"
+date:2021-06-29
+tags:graphing
+caption: "Making maps in Python."
+********************
+title:  "No, The Other One"
+date:2021-06-30
+tags:graphing
+caption: "xkcd 2480"
+********************
+title:  "Downsampling
+date:2021-08-13
+tags:machine-learning, statistics
+caption: "A deeper dive on downsampling."
+********************
+title:  "Deploying An ML Model on GCP"
+date:2021-08-13
+tags:deployment, engineering, teardown
+caption: "Tutorial on Google Cloud Platform"
+********************
+title:  "FinTech Primer"
+date:2021-09-09
+tags:teardown
+caption: "Primer to explain FinTech."
+********************
+title:  "Entity Resolution Primer"
+date:2021-09-12
+tags:teardown
+caption: "Primer to explain Entity Resolution."
+********************
+title:  "AI Product Adoption and MLOps"
+date:2021-09-15
+tags:teardown, talks
+caption: "MLOps is instrumental in AI product adoption."
+********************
+title: "Data Science Books and Courses"
+date:2021-12-15
+tags:teaching, machine-learning
+********************
+title: "My NYU Course Materials"
+date:2021-12-15
+tags:teaching, machine-learning
