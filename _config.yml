@@ -37,8 +37,8 @@ plugins:
 # for header
 header_pages:
   - about.html
-  - resources.html
   - writing.html
+  - resources.html
 
 show_caption: True
 
