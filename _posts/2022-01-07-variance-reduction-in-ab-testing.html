@@ -1,0 +1,293 @@
+---
+layout: post
+title:  "Variance Reduction in A/B Testing"
+date:   2022-01-07 10:00:00 -0500
+tags: teardown engineering
+favorite: "no"
+caption: "Demonstration of the impact of variance reduction"
+---
+
+<div class="post-part">
+    <h2 id="introduction">Introduction</h2>
+    <div class="post-paragraph">
+        In this post, we estimate how variance reduction lowers the required sample size in A/B testing experiments. The
+        theoretical estimates discussed in Part 1 are verified with empirical testing on real data in Part 2. The code
+        is
+        written with <a href="https://metaflow.org/">MetaFlow</a> and the performance is tracked with <a
+            href="https://www.comet.ml/site/">CometML</a>. This analysis lays the framework for a dashboard
+        that an experimenter can use to estimate the sample size and covariate synthesis.
+    </div>
+</div>
+
+
+<div class="post-part">
+    <h2>Part 1. Theoretical Impact of Variance Reduction</h2>
+    <div class="post-paragraph">
+        For a confidence level of 95% and a power of 80%, the number of samples needed increases with sample variance
+        ($\sigma^2$) and decreases with the inverse square of the minimal detectable effect ($\delta$):
+    </div>
+    <div class="equation-center">
+        $ n = 15.7\frac{\sigma^2}{\delta^2}$ &nbsp; (Eq. 1)
+    </div>
+    <div class="post-paragraph">
+        This result utilizes distributional assumptions of the null and alternative hypotheses; see appendix for
+        derivation that draws from the reference section. To reduce the estimated sample size needed, the experimenter
+        can
+        reduce $\sigma^2$ or increase
+        $\delta$. Variance reduction has been well studied, see reference section for examples. Using the CUPED method
+        [Deng], the original
+        square root of variance ($\sigma_o$) has a mathematically defined relationship with the CUPED square root of
+        variance ($\sigma_c$), parameterized by the correlation of the covariate with the target variable ($\rho$):
+    </div>
+    <div class="equation-center">
+        $ \sigma_c = \sigma_o \sqrt{1-\rho^2}$ &nbsp; (Eq. 2)
+    </div>
+    <div class="post-paragraph">
+        For an experiment with and without CUPED, there are two different required sample sizes,
+        $n_c$ and $n_o$, respectively. A clear way to algebraically express the impact of CUPED on required sample size is to
+        take the ratio of these. Using Eq. 1 for required sample size and plugging in Eq. 2 gives:
+    </div>
+    <div class="equation-center">
+        $ \frac{n_c}{n_o} = \frac{15.7(\sigma_c/\delta)^2}{15.7(\sigma_o/\delta)^2} \rightarrow n_c = n_o
+        \sqrt{1-\rho^2}$ &nbsp; (Eq.3)
+    </div>
+    <div class="post-paragraph">
+        Note that as $\rho$ goes to 1, the number of samples required using CUPED reduces.
+    </div>
+
+    <div class="post-paragraph">
+        A related A/B testing measure, the t-statistic, can also be used to demonstrate the effectiveness of CUPED.
+        This is what
+        was empirically measured here. In this case, a <i>larger</i> t-statistic is more desirable, where the
+        t-statistic is
+        defined as the ratio of the difference between means and the sample standard deviation:
+    </div>
+
+    <div class="equation-center">
+        $ t=\frac{\overline{\Delta}}{\sigma} $ &nbsp; (Eq. 4)
+    </div>
+    <div class="post-paragraph">
+        Performing a similar operation as above and using Eq. 2 with Eq. 4, the increase in the t-statistic using CUPED
+        is a function of $\rho$:
+    </div>
+
+    <div class="equation-center">
+        $ t_c=\frac{t_o}{ \sqrt{1-\rho^2}} $ &nbsp; (Eq. 5)
+    </div>
+
+    <div class="post-paragraph">
+        A typical threshold for confidence is 95%, equivalent to a t-statistic of 1.96. The x-axis in Figure 1
+        shows the value of $t_o$. The base case is $\rho$=0 and when $t_o$=1.96, the p-value is 5%. For a smaller
+        value of the t-statistic and fixed minimum detectable effect, the p-value is not significant - it is >5%.
+        Employing CUPED, say with a correlation of $\rho$=0.5 (green line), a lower or 'worse' $t_o$ can still lead to
+        significance.
+    </div>
+
+    <div class="post-paragraph">
+        According to references [Liou (Facebook), Xie (Netflix)], an observed empirical variance reduction of ~40%
+        implies
+        $\rho$=0.6 can be achieved in practice. Alternatively, [Li (DoorDash)] proposes CUPAC, which uses Machine
+        Learning to synthetically create a covariate, and observations imply $\rho$~0.9.
+    </div>
+
+    <div class="post-figure">
+        <img src="/assets/img/posts/variance-reduction-in-ab-testing-1.png" loading="lazy" alt="Figure">
+    </div>
+    <div class="post-caption">
+        Figure 1: Relationship between t-statistic and p-value. The different lines represents different values of
+        $\rho$,
+        the correlation of the covariate to the target variable.
+    </div>
+
+    <div class="post-paragraph">
+        More generally, Figure 2 shows the required correlation for a given t-statistic to get a p-value of 5%.
+    </div>
+
+    <div class="post-figure">
+        <img src="/assets/img/posts/variance-reduction-in-ab-testing-2.png" loading="lazy" alt="Figure">
+    </div>
+    <div class="post-caption">
+        Figure 2: Minimum $\rho$ required for a given value of t in order to get a p-value < 5%.
+    </div>
+</div>
+
+<div class="post-part">
+    <h2>Part 2. Empirical Confirmation</h2>
+    <h3>2.1 Data Description and Modifications</h3>
+    <div class="post-paragraph">
+        Data was downloaded from the <a href="https://github.com/coveooss/SIGIR-ecom-data-challenge">Coveo SIGIR
+        challenge</a>:
+        the dataset contains fully anonymized fine-grained events from an online store, i.e. all the products inspected
+        and purchased by shoppers in a random sample of browsing sessions spanning for several months (the full dataset
+        contains more than 30M shopping events). Experimentation utilized data from 3/16/2019 to 3/31/2019 as the
+        treatment and 4/1/2019 to 4/8/2019 as the control. The data was treated as follows. The rows were aggregated by
+        <i> session_id_hash </i> (a unique identifier of a browsing session by an anonymous shopper) and <i>date</i> and
+        given a
+        label
+        of “1” if any <i>product_action</i> had a ‘purchase’, otherwise it was labeled “0” (that is, all sessions that
+        led to a
+        purchase are 1s, sessions without any purchase activity - the majority - are are 0s). The idea is that the
+        <i>session_id_hash</i> is approximated to the unit of testing and the event of concern is a purchase.
+    </div>
+    <div class="post-paragraph">
+        The treatment and control are homogenous because no actual treatment took place. This was confirmed by looking
+        at the distributional properties of each. The average purchase rate among session ids is ~0.92% with a variance
+        of 0.0091. There are approximately 44k and 24k sessions in the control and treatment datasets, respectively.
+    </div>
+    <div class="post-paragraph">
+        Since no A/B test took place on this data, the binary purchase indicator was artificially modified in the
+        treatment set.
+        This is an input that can be varied. For the results below, the treatment target value converts an additional
+        $\delta$=0.0015 (0.15%) session ids to purchases. This is to simulate the effect of a treatment that
+        increased purchase rates. This value of $\delta$ calibrates to borderline cases for
+        detecting effects. The required sample size, using Eq. 1, is approximately 63k, e.g. slightly above the range
+        used. It also gives a t-statistic of ~1.5 when accounting for both treatment and control variances.
+    </div>
+    <div class="post-paragraph">
+        In addition, a covariate was artificially created using a normal random variable and input value of $\rho$ as
+        follows ($z$ represents the normalized target variable):
+    </div>
+    <div class="equation-center">
+        $ x = \rho z + \sqrt{1-\rho^2} \ N(0,1) $ &nbsp; (Eq. 6)
+    </div>
+
+    <h3>2.2 MetaFlow and CometML</h3>
+    <div class="post-paragraph">
+        The experimental workflow and tracking were done with <a href="https://metaflow.org/">MetaFlow</a> and
+        <a href="https://www.comet.ml/site/">CometML</a>, respectively. First the data is imported, then a covariate
+        is created using a fixed value of $\rho$, then the treatment is modified. The experiment varied the value of
+        $\rho$, so that the <code>foreach</code> function in MetaFlow was used to achieve parallelization. Finally, a p-value
+                                         is measured.
+    </div>
+    <div class="post-paragraph">
+The inputs to the experiment are the treatment size and the correlation of the covariate, where the former was set to
+        $\delta$ =0.0015. For different input values of $\rho$, the t-statistic and p-value are measured so they can be
+        compared to theoretical results from the previous section.
+    </div>
+    <h3>2.3 Results</h3>
+    <div class="post-paragraph">
+Figure 3 shows the t-statistic and p-value as a function of $\rho$ as shown in CometML. In Figure 4, the observed
+        t-statistic as a function of $\rho$ and plotted against the theoretical value as derived in Eq. 5 indicating
+        close matching.
+    </div>
+    <div class="post-figure">
+        <img src="/assets/img/posts/variance-reduction-in-ab-testing-3.png" loading="lazy" alt="Figure">
+    </div>
+    <div class="post-caption">
+        Figure 3: CometML dashboard showing t-statistic (y-axis) vs correlation $\rho$ (x-axis) [left side of figure]
+        and p-value (y-axis) vs correlation $\rho$ (x-axis) [right side of figure].
+    </div>
+    <div class="post-figure">
+        <img src="/assets/img/posts/variance-reduction-in-ab-testing-4.png" loading="lazy" alt="Figure">
+    </div>
+    <div class="post-caption">
+        Figure 4: Comparison of theoretical and empirical results (note- ‘observed’ should be  ‘theoretical’).
+    </div>
+</div>
+
+<div class="post-part">
+    <h2>References</h2>
+    <ul>
+        <li>Deng, Xu, Kohavi, Walker. 2013. Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data.</li>
+        <li>Xie, Aurisett. 2016. Improving the Sensitivity of Online Controlled Experiments: Case Studies at Netflix.</li>
+        <li>Liou, Taylor. 2020. Variance-Weighted Estimators to Improve Sensitivity in Online Experi- ments.</li>
+        <li>Li, Tang, Bauman. 2020. Improving Experimental Power through Control Using Predictions as Covariate (CUPAC).</li>
+        <li>Kohavi. 2020. Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing.</li>
+        <li>Dmitriev, Gupta, Kim, Vaz.  A Dirty Dozen: Twelve Common Metric Interpretation Pitfalls in Online Controlled Experiments.  2017.</li>
+    </ul>
+</div>
+
+<div class="post-part">
+    <h2>Appendix</h2>
+    <div class="post-paragraph">
+        Several great explanations exist [see references] that range from extremely technical and non-technical.  This section increases the entropy on the topic, but helps convince myself I understand it!
+    </div>
+    <div class="post-paragraph">
+        In A/B testing and hypothesis testing in general, there are four potential outcomes:
+<ul>
+    <li>Confidence: $P(accept \ H_o|H_o)>1-\alpha$;</li>
+    <li>False Positive Rate: $P(reject \ H_o|H_o)<\alpha$;</li>
+    <li>Power: $P(reject \ H_o|H_1)>1-\beta$;</li>
+    <li>False Negative Rate: $P(accept \ H_o|H_1)>\beta$;</li>
+</ul>
+    </div>
+    <h3>False Positive Rate</h3>
+    <div class="post-paragraph">
+        To control for the False Positive rate, at a (one-tailed) confidence of 1-$\alpha$, we exploit the law of large
+        numbers, which allows us to assume that $x_{obs}\frac{\sqrt{n}}{\sigma}$ is standard normally distributed.
+        Hence, to reject the null hypothesis, we require:
+    </div>
+    <div class="equation-center">
+        $ P( \ x_{obs}\frac{\sqrt{n}}{\sigma} > \Phi^{-1}(1-\alpha)|H_o \ ) $ &nbsp; (Eq. A1)
+    </div>
+    <div class="post-paragraph">
+        Note that using the properties of the normal cdf function, this establishes a FPR of $\alpha$:
+    </div>
+    <div class="equation-center">
+        $ P( \ x_{obs}\frac{\sqrt{n}}{\sigma}>\Phi^{-1}(1-\alpha)|H_o \ ) =$ <br/>
+        $ 1 - P( \ x_{obs}\frac{\sqrt{n}}{\sigma}<\Phi^{-1}(1-\alpha)|H_o \ ) =$ <br/>
+        $ 1- \Phi ( \ \Phi^{-1}(1-\alpha) \ ) =$ <br/>
+        $ \alpha $
+    </div>
+
+    <h3>False Negative Rate</h3>
+    <div class="post-paragraph">
+        If we assume the null hypothesis ($H_o$) and calculate sufficient confidence, we still cannot rule out the
+        possibility of a false negative.  That is, assuming the alternative hypothesis ($H_1$), we keep $H_o$:
+        $P(accept \ H_o|H_1)$.  To control for this, we would want this probability to be less than a number, $\beta$.
+        The smaller the $\beta$, the more power ($1-\beta$) the experiment has at reducing False Negatives.  We can
+        write this mathematically by flipping the sign and the conditional in Eq. A1 and requiring that it is smaller
+        than $\beta$:
+    </div>
+    <div class="equation-center">
+        $ P( \ x_{obs}\frac{\sqrt{n}}{\sigma}<\Phi^{-1}(1-\alpha)|H_1 \ ) < \beta$ &nbsp; (Eq. A1)
+    </div>
+    <div class="post-paragraph">
+        The challenge here is that $x_{obs}\frac{\sqrt{n}}{\sigma}$ is not standard normally distributed, because we
+        are conditioned on the alternative
+        distribution, which has a mean shifted away from zero.  We can refer to this distance as $\delta$.  In
+        experiments, this is called the minimal detectable effect.  The intuition here, is that <i>despite</i> having
+        an actual mean of $\delta$, the observed sample value (because when we run experiments, we sample from a
+        distribution) might be some distance away from $\delta$.  If this alternative distribution is really wide, then
+        there’s the possibility that we have enough confidence to keep $H_o$, but insufficient power to reject $H_1$.
+    </div>
+    <div class="post-paragraph">
+        To reshape $x_{obs}$ into a standard normal, we shift it by the mean of the alternative distribution by
+        adding and subtracting $\delta$.  Now, $(x_{obs}-\delta) \frac{\sqrt{n}}{\sigma}$ is normally distributed and we
+        can use cdf mathematics.
+    </div>
+    <div class="equation-center">
+        $P( \ (x_{obs}-\delta+\delta)\frac{\sqrt{n}}{\sigma} < \Phi^{-1}(1-\alpha)|H_1 \ ) <\beta$ <br/>
+        $P( \ (x_{obs}-\delta)\frac{\sqrt{n}}{\sigma} < \Phi^{-1}(1-\alpha)-\delta\frac{\sqrt{n}}{\sigma}|H_1 \ )
+        <\beta$ <br/>
+        $\Phi(\Phi^{-1}(1-\alpha)-\delta\frac{\sqrt{n}}{\sigma})< \beta$ <br/>
+        $\Phi^{-1}(1-\alpha)-\delta\frac{\sqrt{n}}{\sigma}< \Phi^{-1}(\beta)$ <br/>
+        $\delta\frac{\sqrt{n}}{\sigma}>\Phi^{-1}(1-\alpha)- \Phi^{-1}(\beta)$ <br/>
+        $n>( \Phi^{-1} (1-\alpha) - \Phi^{-1} (\beta) )^2  \frac{\sigma^2}{\delta^2} $ &nbsp; (Eq. A3)
+    </div>
+
+    <h3>Two-Tail Test and Plugging in Values</h3>
+    <div class="post-paragraph">
+    All of the above assume one-tailed tests.  There is a lot of material on whether one should use 1 or 2 tailed tests. Kohavi assumes two-tail, so we modify Eq. A3 to account for this by simply accounting for two sides on the confidence interval:
+    </div>
+    <div class="equation-center">
+        $n>2( \Phi^{-1} (1-\alpha/2) - \Phi^{-1} (\beta) )^2  \frac{\sigma^2}{\delta^2}$ &nbsp; (Eq. A4)
+    </div>
+    <div class="post-paragraph">
+    Plugging in generally accepted values $\alpha$=0.05 and $\beta$=0.20 gets the final estimate of required samples:
+
+    </div>
+    <div class="equation-center">
+        $n>2*(1.96+0.84)^2 \frac{\sigma^2}{\delta^2}$<br/>
+        $n>15.7\frac{\sigma^2}{\delta^2}$
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
