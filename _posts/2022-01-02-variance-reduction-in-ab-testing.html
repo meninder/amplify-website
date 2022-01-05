@@ -8,11 +8,12 @@ caption: "Demonstration of the impact of variance reduction"
 ---
 
 <div class="post-part">
+    <p class="author-subtitle">Written with <a href="https://www.linkedin.com/in/jacopotagliabue/">Jacopo Tagliabue</a></p>
     <h2 id="introduction">Introduction</h2>
     <div class="post-paragraph">
         In this post, we estimate how variance reduction lowers the required sample size in A/B testing experiments. The
-        theoretical estimates discussed in Part 1 are verified with empirical testing on real data in Part 2. The code
-        is
+        theoretical estimates discussed in <a href="#part-1-theoretical-impact-of-variance-reduction">Part 1</a> are
+        verified with empirical testing on real data in <a href="#part-2-empirical-confirmation">Part 2</a>. The code is
         written with <a href="https://metaflow.org/">MetaFlow</a> and the performance is tracked with <a
             href="https://www.comet.ml/site/">CometML</a>. This analysis lays the framework for a dashboard
         that an experimenter can use to estimate the sample size and covariate synthesis.  All code is available <a
@@ -22,7 +23,7 @@ caption: "Demonstration of the impact of variance reduction"
 
 
 <div class="post-part">
-    <h2>Part 1. Theoretical Impact of Variance Reduction</h2>
+    <h2 id="part-1-theoretical-impact-of-variance-reduction">Part 1. Theoretical Impact of Variance Reduction</h2>
     <div class="post-paragraph">
         For a confidence level of 95% and a power of 80%, the number of samples needed increases with sample variance
         ($\sigma^2$) and decreases with the inverse square of the minimal detectable effect ($\delta$):
@@ -113,7 +114,7 @@ caption: "Demonstration of the impact of variance reduction"
 </div>
 
 <div class="post-part">
-    <h2>Part 2. Empirical Confirmation</h2>
+    <h2 id="part-2-empirical-confirmation">Part 2. Empirical Confirmation</h2>
     <h3>2.1 Data Description and Modifications</h3>
     <div class="post-paragraph">
         Data was downloaded from the <a href="https://github.com/coveooss/SIGIR-ecom-data-challenge">Coveo SIGIR
