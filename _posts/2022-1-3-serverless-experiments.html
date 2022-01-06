@@ -6,28 +6,87 @@ tags: deployment engineering cloud
 favorites: "no"
 caption: "Using AWS to run a serverless architecture"
 ---
-
-<p>I recently built an <a href="https://www.serverlessexperiments.com/index">application</a> using <a
-        href="https://aws.amazon.com/lambda/serverless-architectures-learn-more/">serverless
-    architecture</a>.  The figure below summarizes the various components involved.</p>
-
-<img src="/assets/img/posts/serverless-experiments.png" loading="lazy" alt="Figure" , height="auto" , width="800px">
-
-<p>The two running experiments are:
+<h2 id="the-application">The Application</h2>
+<p>I recently built <a href="https://www.serverlessexperiments.com/index">this application</a> using serverless
+    architecture</a>, which is described in more detail here. There are two running experiments:
     <ul>
-        <li><a href="https://www.serverlessexperiments.com/pun_generator">Pun generator</a>: </li>
-        <li><a href="https://www.serverlessexperiments.com/entity_resolution">Entity Resolution</a>:</li>
+        <li><a href="https://www.serverlessexperiments.com/pun_generator">Pun generator</a></li>
+        <li><a href="https://www.serverlessexperiments.com/entity_resolution">Entity Resolution</a></li>
     </ul>
 </p>
 
-<p> Description of the components:
-    <ul>
-        <li>S3: </li>
-        <li>DynamoDB:</li>
-        <li>Lambda:</li>
-        <li>API Gateway:</li>
-        <li>Amplify:</li>
-    </ul>
-
-
+<h2 id="what-is-serverless">What is Serverless?</h2>
+<p> <a href="https://aws.amazon.com/lambda/serverless-architectures-learn-more/">AWS explains</a> the term
+    <em>serverless</em>, aka Function as a Service (FaaS) as:
+<blockquote>
+    <p>A serverless architecture is a way to build and run applications and services without having to manage
+        infrastructure... You no
+        longer have to provision, scale, and maintain servers to run your applications, databases, and storage systems.
+    </p>
+</blockquote>
 </p>
+
+<p>The figure below summarizes a generic serverless architecture with AWS.  S3 and Dynamo are stateful components
+    for storage that may or may not be needed in all application.  <a href="https://aws.amazon.com/lambda/">Lambda</a> is
+        the serverless, event-driven compute.  Instead of spinning up a machine that is latent most of the time, this
+    is on demand compute.  Hence, for a few pennies a month (actually free!), I can have the live application
+    running.  Amplify is the front end for these applications.
+</p>
+<img src="/assets/img/posts/serverless-experiments-1.png" loading="lazy" alt="Figure" , height="auto" , width="800px">
+
+
+<h2 id="pun-generator">Pun Generator</h2>
+<p>A rudimentary algorithm, with limited to no error handling or enhancements.  The code executes the following
+    steps:</p>
+<ul>
+    <li>Receives the input word.  For now, not treatment to this word is performed.  It does a look-up for a
+        dictionary in S3 that converts the word to its pronunciation using the <a
+                href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">CMU dictionary</a>.</li>
+    <li>It checks DynamoDB to see if the word has been searched before.  This is a computationally cheap way to
+        prevent repeat calculations.  DynamoDB acts something like a cache.</li>
+    <li>If the word has not be searched before, a list of idioms is pulled from S3.  These idioms have been scraped
+    from a few websites that list a few thousand idioms.  The output is limited by the quality of these idioms and
+        the subsequent step.</li>
+    <li>Each idiom is converted to pronunciation form and then the distance between the input word and each word in
+    the idiom is calculated.  </li>
+    <li>The shortest top 10 distances are outputted and the results are cached.</li>
+</ul>
+The specific architecture is sketched here:
+<img src="/assets/img/posts/serverless-experiments-2.png" loading="lazy" alt="Figure" , height="auto" , width="800px">
+
+<h2 id="entity-resolution">Entity Resolution</h2>
+    <p> The model is based on <a href="https://norvig.com/spell-correct.html" class="link-primary">Norvig's
+        spelling corrector</a>.
+        The general equation, using Bayes Theorem to disambiguate sub-problems:
+        $$\{c|P(c|\epsilon)>\theta\}\longrightarrow \{c|P(\epsilon|c)P(c)>\theta\}$$
+    </p>
+    <p> There are four parts:</p>
+    <ol>
+        <li><b>Selection Model:</b> $>\theta$. This is the threshold by which two entities are considered a
+            match. This should be based on
+            some training examples of labeled data.
+        </li>
+        <li><b>Candidate Model:</b> $\{c\}$. Set of candidates. Picking an appropriate set of candidates is the
+            crux
+            of the entity resolution methodology. Too few candidates will result in low recall. Too many will
+            lead
+            to $n^2$ computations making it infeasible. In my current approach, I am only considering two
+            candidates
+            that are inputted by the users.
+        </li>
+        <li><b>Error Model:</b> $P(\epsilon|c)$. There are numerous methods to model this. For example, a
+            machine
+            learning model. In this case, the model is number of correct divided by length of bigger word. An
+            imperfect measure to say the least.
+        </li>
+        <li><b>Entity Model:</b> $P(c)$. Assumed to be 1 for now. When properly implemented, will correct for
+            common/rare
+            instances.
+        </li>
+    </ol>
+    <p>The algorithm does basic treatment to the two input words (lower case, removing punctuation and words like
+        inc, corp, etc.  Then the model described above is applied to calculate the probabilty of the match.  Entity
+        Resolution is a complex, deep topic.  This application barely scratches the surface.  For more detail, I wrote
+        <a href="https://www.meninderpurewal.com/2021/09/12/entity-resolution-primer.html" class="link-primary">this
+            primer</a> for my NYU class.</p>
+
