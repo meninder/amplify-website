@@ -1,0 +1,54 @@
+---
+layout: post
+title: "Entity Resolution"
+date: 2022-01-11 10:00:00 -0500
+tags: deployment engineering cloud
+favorite: "no"
+caption: "Description of the entity resolution methodology"
+---
+
+<h2>Introduction</h2>
+<p>The serverless components of the <a href="https://www.serverlessexperiments.com/entity_resolution.html"> Pun
+    Generator Application</a> are described in <a
+        href="{% link _posts/2022-01-03-serverless-experiments.html %}">another post</a>.  For more detail the
+    subject of Entity Resolution, I wrote
+        <a href="{% link _posts/2021-09-12-entity-resolution-primer.html %}" class="link-primary">this primer</a>
+    for my NYU class. For the specific implementation, the methodology is described below.</p>
+
+<h2 id="methodology-i">Methodology I</h2>
+
+    <p> The model is based on <a href="https://norvig.com/spell-correct.html" class="link-primary">Norvig's
+        spelling corrector</a>.
+        The general equation, using Bayes Theorem to disambiguate sub-problems:
+        $$\{c|P(c|\epsilon)>\theta\}\longrightarrow \{c|P(\epsilon|c)P(c)>\theta\}$$
+    </p>
+    <p> There are four parts:</p>
+    <ol>
+        <li><b>Selection Model:</b> $>\theta$. This is the threshold by which two entities are considered a
+            match. This should be based on
+            some training examples of labeled data.
+        </li>
+        <li><b>Candidate Model:</b> $\{c\}$. Set of candidates. Picking an appropriate set of candidates is the
+            crux
+            of the entity resolution methodology. Too few candidates will result in low recall. Too many will
+            lead
+            to $n^2$ computations making it infeasible. In my current approach, I am only considering two
+            candidates
+            that are inputted by the users.
+        </li>
+        <li><b>Error Model:</b> $P(\epsilon|c)$. There are numerous methods to model this. For example, a
+            machine
+            learning model. In this case, the model is number of correct divided by length of bigger word. An
+            imperfect measure to say the least.
+        </li>
+        <li><b>Entity Model:</b> $P(c)$. Assumed to be 1 for now. When properly implemented, will correct for
+            common/rare
+            instances.
+        </li>
+    </ol>
+    <p>The algorithm does basic treatment to the two input words (lower case, removing punctuation and words like
+        inc, corp, etc.  Then the model described above is applied to calculate the probabilty of the match.  Entity
+        Resolution is a complex, deep topic.  This application barely scratches the surface.  </p>
+
+
+<h2 id="methodology-ii">Methodology II</h2>

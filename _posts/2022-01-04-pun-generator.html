@@ -1,0 +1,30 @@
+---
+layout: post
+title: "Pun Generator"
+date: 2022-01-04 10:00:00 -0500
+tags: deployment engineering cloud
+favorite: "no"
+caption: "Description of the pun generator app methodology"
+---
+
+<p>The serverless components of the <a href="https://www.serverlessexperiments.com/pun_generator"> Pun Generator
+    Application</a> are described in a <a href="{% link _posts/2022-01-03-serverless-experiments.html %}">another
+    post</a>.  In this post, more detail on the methodology is described (and more to come).</p>
+
+<p>A rudimentary algorithm, with limited to no error handling or enhancements.  The code executes the following
+    steps:</p>
+<ul>
+    <li>Receives the input word.  For now, not treatment to this word is performed.  It does a look-up for a
+        dictionary in S3 that converts the word to its pronunciation using the <a
+                href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">CMU dictionary</a>.</li>
+    <li>It checks DynamoDB to see if the word has been searched before.  This is a computationally cheap way to
+        prevent repeat calculations.  DynamoDB acts something like a cache.</li>
+    <li>If the word has not be searched before, a list of idioms is pulled from S3.  These idioms have been scraped
+    from a few websites that list a few thousand idioms.  The output is limited by the quality of these idioms and
+        the subsequent step.</li>
+    <li>Each idiom is converted to pronunciation form and then the distance between the input word and each word in
+    the idiom is calculated.  </li>
+    <li>The shortest top 10 distances are outputted and the results are cached.</li>
+</ul>
+The specific architecture is sketched here:
+<img src="/assets/img/posts/serverless-experiments-2.png" loading="lazy" alt="Figure" , height="auto" , width="800px">
