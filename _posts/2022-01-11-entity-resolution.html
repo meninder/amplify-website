@@ -52,3 +52,84 @@ caption: "Description of the entity resolution methodology"
 
 
 <h2 id="methodology-ii">Methodology II</h2>
+
+<p>This model uses lookups rather than direct matching, which allows for the circumstance that a
+    company name may have different letters or words, but still refer to the same entity, like <i>Meta Platforms</i> and
+    <i>Facebook</i>.</p>
+
+<h3>General Framework</h3>
+<p>A lookup table is constructed of <i>keys</i> that map to a specific company, where the company name is
+    predefined. There is a probability of association between the key and the company, as defined in the next
+    section.  When a user inputs two entities, they are (probabilistically) associated with a key and in turn a
+    company name.  Thus, there are two major parts of the framework.  First, building the look-up table.  Second,
+    utilizing the look-up table to identify matches and non-matches.</p>
+
+<h3>Building the Look-Up Table</h3>
+<p>In this model, a company is represented by a document or a set of documents.  To start, I use its Wikipedia
+    page. Alternatively, annual reports, SEC filings, or an aggregation of all of them can be used.  Then a key-value
+    store is constructed by:</p>
+<ul>
+    <li>It starts with a set of company names to iterate over.  I use the <a
+            href="https://en.wikipedia.org/wiki/List_of_S%26P_500_companies">SP500</a> list, which consists of 500 the
+        largest market capitalization companies in the US.  This can be expanded. </li>
+    <li>A set of documents are identified for each company.  Here, I use the company's wiki page.  I do this by
+        taking the SP500 list from the previous step to get the wiki urls for each company, and then get the page id
+        for each wiki url.  This allows me to use the
+        python <a href="https://github.com/goldsmith/Wikipedia">wikipedia</a> package to get the content. </li>
+    <li>For each company, the organizations referenced within the documents (eg the wiki page) are identified using
+        the <a href="https://spacy.io/">spaCy</a> named entity resolution (NER) package. This generates relevant and
+        irrelevant <em>candidates</em> to be associated with the company.</li>
+    <li>A probabilistic model is built to determine the association between the candidates and the company. There
+        are many approaches, I tried the two below and ultimately went with 1 for simplicity.</li>
+    <ol>
+        <li>A simple model for probability is the normalized count of the organizations on the page.  The drawback
+            here is that slight variations of the company name appear infrequent, similar to completely irrelevant
+            candidates.</li>
+        <li>In the next level of sophistication, it is assumed that the most frequent candidate is the
+            <em>golden source</em>.  All candidates are compared to this with a similarity function that defines
+            the probability of it being a relevant candidate.  The drawback here is that a company with two
+            frequent names (Alphabet and Google or Facebook and Meta) have dissimilar names.</li>
+    </ol>
+    <li>For each company, the list of candidates and their corresponding companies and probabilities are stored in a
+        dictionary that is subsequently written to DynamoDb.  Note that in the case a candidate appears for two
+        different companies, the higher probability determines which company the candidate gets mapped to.</li>
+</ul>
+
+<h3>Matching Algorithm</h3>
+<p>To determine if two entities match, the illustration below demonstrates the potential cases for matching.
+    Given the complexity, some notation is required. </p>
+<ul>
+    <li>$e_i$: Entity $i$ that is input by the user for matching.</li>
+    <li>$c_j$: Candidate $j$ are the keys of the dictionary constructed from the previous section that map to each
+        company.</li>
+    <li>$t_k$: The ticker or company name that is the value which candidates are mapped to.</li>
+    <li>$P_m$ and $P_l$: The probability of an overall match and the probability of a match via look-up.</li>
+</ul>
+<img src="/assets/img/posts/entity-resolution-1.png" loading="lazy" alt="Figure" , height="auto" , width="800px">
+<br/>
+<br/>
+<br/>
+<ul>
+    <li><b>Case I</b>: Match.  The entities themselves match with probability $P_m = P_{ee}$, which is higher than all
+        other cases below <em>and</em> higher than a predefined threshold $\theta_e$.</li>
+    <li><b>Case II</b>: Match.  The entities match to the same candidate, where the probability is expressed as
+        $\min\{P_{e_1c_j}, P_{e_2c_j}\}$.</li>
+    <li><b>Case III</b>: Match.  The entities match to different candidates, but the candidates map to the same
+        company.  Here, a chain rule is required.  For entity $i$, the probability is $P_{e_ic_j}P_{c_jt_k}$.  The
+        minimum over each $i$ is used to represent the likelihood of the match.</li>
+    <li><b>Case IV</b>:  Non-Match.  The entities map to different candidates, which map to different company names.
+        The probability is the same as case III.</li>
+    <li><b>Case V</b> (not shown): Non-Match. All other conditions will return a non-match.  The fall back is Case I
+        .</li>
+</ul>
+
+<p>Mathematically, this is written as:
+$$ P_m = max\{1_{P_{ee}>\theta_e}P_{ee}, P_l\} $$
+$$ P_l = \begin{cases}
+    \min\{ P_{e_1c_j}, P_{e_2c_j} \}  & Case II\\
+    \min\{ P_{e_1c_j}P_{c_jt_k}, P_{e_2c_j}P_{c_jt_k} \} & Case III
+    \end{cases}
+    $$
+
+
+</p>
