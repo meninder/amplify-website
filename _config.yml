@@ -32,6 +32,7 @@ linkedin_username: meninder-purewal
 # theme: minima
 plugins:
   - jekyll-feed
+future: true
 
 # for header
 header_pages:
